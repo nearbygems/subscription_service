@@ -1,0 +1,204 @@
+openapi: 3.0.3
+info:
+  title: Subscription Service API
+  version: 1.0.0
+  description: REST API для управления онлайн-подписками пользователей
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /subscriptions:
+    get:
+      summary: Список подписок
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+        - in: query
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: service_name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+    post:
+      summary: Создать подписку
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+
+  /subscriptions/{id}:
+    get:
+      summary: Получить подписку
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '404':
+          description: Not Found
+    put:
+      summary: Обновить подписку
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionUpdate'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+    delete:
+      summary: Удалить подписку
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+
+  /subscriptions/summary:
+    get:
+      summary: Суммарная стоимость подписок за период
+      parameters:
+        - in: query
+          name: period_from
+          schema:
+            type: string
+            example: "01-2025"
+        - in: query
+          name: period_to
+          schema:
+            type: string
+            example: "12-2025"
+        - in: query
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: service_name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 1200
+
+components:
+  schemas:
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        service_name:
+          type: string
+        price:
+          type: integer
+        user_id:
+          type: string
+          format: uuid
+        start_date:
+          type: string
+          example: "07-2025"
+        end_date:
+          type: string
+          nullable: true
+          example: "12-2025"
+        created_at:
+          type: string
+          format: date-time
+    SubscriptionCreate:
+      type: object
+      required:
+        - service_name
+        - price
+        - user_id
+        - start_date
+      properties:
+        service_name:
+          type: string
+        price:
+          type: integer
+        user_id:
+          type: string
+          format: uuid
+        start_date:
+          type: string
+          example: "07-2025"
+        end_date:
+          type: string
+          nullable: true
+          example: "12-2025"
+    SubscriptionUpdate:
+      type: object
+      properties:
+        service_name:
+          type: string
+        price:
+          type: integer
+        start_date:
+          type: string
+        end_date:
+          type: string
+          nullable: true
